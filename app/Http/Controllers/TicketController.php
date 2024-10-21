@@ -9,7 +9,6 @@ class TicketController extends Controller
 {
     public function showTickets()
     {
-        $tickets = Ticket::paginate(6);
-        return view('ticket.index',compact('tickets'));
+        return view('ticket.index');
     }
 }
