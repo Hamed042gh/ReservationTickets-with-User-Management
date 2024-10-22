@@ -83,5 +83,5 @@
     </div>
 
     <!-- Pagination -->
-
+    {{ $tickets->links() }}
 </div>
