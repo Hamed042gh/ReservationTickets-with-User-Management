@@ -14,6 +14,7 @@ class TicketReservation extends Component
     public $user;
     public $tickets;
     public $previewReservation = false;
+    public $searchTerm;
     public $selectedTicket;
     public $reservationData = [];
     public $searchByOrigin;
@@ -55,29 +56,57 @@ class TicketReservation extends Component
 
             ]);
             $this->resetPreview();
-            return redirect()->back()->with('message', 'reserved successfully!');
+            session()->flash('message', 'reserved successfully!');
         } else {
             return redirect()->back()->with('error', 'No available seats for this ticket!');
         }
     }
+
     public function resetPreview()
     {
 
         $this->previewReservation = false;
         $this->selectedTicket = null;
         $this->reservationData = [];
-        return redirect()->back()->with('error', 'Reservation canceled!');
+        session()->flash('message', 'Reservation cancled!');
     }
 
 
+    public function search()
+    {
+        $this->validate([
+            'searchByOrigin' => 'nullable|string|min:3',
+            'searchByDestination' => 'nullable|string|min:3',
+            'searchByReservation_date' => 'nullable|date',
+        ]);
 
+        $query = Ticket::query();
 
+        //search with Origin
+        if (!empty($this->searchByOrigin)) {
+            $query->where('origin', 'like', '%' . $this->searchByOrigin . '%');
+        }
+
+        //search with searchByDestination
+        if (!empty($this->searchByDestination)) {
+            $query->where('destination', 'like', '%' . $this->searchByDestination . '%');
+        }
+        //search with searchByReservation_date
+        if (!empty($this->searchByReservation_date)) {
+            $query->whereDate('departure_date', $this->searchByReservation_date);
+        }
+
+        $this->tickets = $query->get();
+
+        if ($this->tickets->isEmpty()) {
+            session()->flash('message', 'No tickets found for your search!');
+        }
+    }
 
     public function render()
     {
         return view('livewire.ticket-reservation', [
-            'tickets' => $this->tickets,
-            'reservationData' => $this->reservationData,
+            'tickets' => $this->tickets
         ]);
     }
 }

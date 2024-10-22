@@ -18,9 +18,15 @@
 
     <!-- Search Section -->
     <form class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between" wire:submit.prevent="search">
-        <input type="text" wire:model="searchTerm"
+        <input type="text" wire:model="searchByOrigin"
             class="border p-2 w-full md:w-1/2 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            placeholder="Search for tickets (Origin, Destination, Date)">
+            placeholder="Search by Origin">
+        <input type="text" wire:model="searchByDestination"
+            class="border p-2 w-full md:w-1/2 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 mt-2"
+            placeholder="Search by Destination">
+        <input type="date" wire:model="searchByReservation_date"
+            class="border p-2 w-full md:w-1/2 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 mt-2"
+            placeholder="Select a Date">
         <button
             class="mt-2 md:mt-0 md:ml-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-500 transition duration-200">Search</button>
     </form>
