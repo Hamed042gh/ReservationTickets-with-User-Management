@@ -24,7 +24,7 @@ class TicketFactory extends Factory
             'origin' => fake()->city(),
             'destination' => fake()->city(),
             'departure_date' => fake()->dateTimeBetween('+0 days', '+1 week'),
-            'amount' => fake()->numberBetween(1000, 500000),
+            'amount' => fake()->numberBetween(10000, 500000),
             'available_count' => fake()->numberBetween(1, 40),
         ];
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('track_id')->nullable();
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount',10,0)->default(1000);
             $table->string('payer_name');
             $table->string('payer_identity')->nullable();
             $table->string('status')->default('pending');

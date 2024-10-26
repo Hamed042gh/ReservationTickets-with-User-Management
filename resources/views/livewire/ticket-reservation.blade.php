@@ -39,7 +39,7 @@
                 <p class="text-sm font-bold">To: {{ $ticket->destination }}</p>
                 <p class="text-sm font-bold">Departure: {{ $ticket->departure_date }}</p>
                 <p class="text-sm font-bold text-red-500">Available Seats: {{ $ticket->available_count }}</p>
-                <p class="text-sm font-bold">Price: ${{ $ticket->amount }}</p>
+                <p class="text-sm font-bold">Price:{{ intval($ticket->amount) }} ریال</p>
 
                 <button type="button"
                     class="mt-2 bg-green-600 text-white p-2 rounded-lg hover:bg-green-500 transition duration-200 w-full"
@@ -63,7 +63,7 @@
                                 <p>To: {{ $selectedTicket->destination }}</p>
                                 <p>Departure Date: {{ $reservationData['reservation_date'] }}</p>
                                 <p>Available Seats: {{ $selectedTicket->available_count }}</p>
-                                <p>Price: ${{ $selectedTicket->amount }}</p>
+                                <p>Price:{{ intval($selectedTicket->amount) }} ریال</p>
                             </div>
                         </div>
                         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

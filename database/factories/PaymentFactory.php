@@ -17,10 +17,10 @@ class PaymentFactory extends Factory
     {
         return [
             'track_id' => $this->faker->unique()->word,
-            'amount' => 1000,
+            'amount' => fake()->numberBetween(10000, 500000),
             'payer_name' => $this->faker->name,
             'payer_identity' => $this->faker->email,
-            'status' =>'pending',
+            'status' => 'pending',
             'user_id' => User::factory(),
         ];
     }

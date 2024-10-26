@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Ticket;
+use App\Models\Payment;
 use Livewire\Component;
 use App\Models\Reservation;
 use Livewire\WithPagination;
@@ -35,6 +36,7 @@ class TicketReservation extends Component
             'user_id' => $this->user->id,
             'ticket_id' => $ticketId,
             'reservation_date' => $ticket->departure_date,
+           
         ];
 
         $this->previewReservation = true; // Show the reservation preview
@@ -45,13 +47,17 @@ class TicketReservation extends Component
         $ticket = $this->selectedTicket;
 
         if ($ticket && ($ticket->available_count) >= 1) {
-            Reservation::create([
+       
+         
+          Reservation::create([
                 'user_id' => $this->user->id,
                 'ticket_id' => $ticket->id,
                 'reservation_date' => $ticket->departure_date,
             ]);
             $this->resetPreview();
             session()->flash('message', 'Reserved successfully!');
+            return redirect()->route('purchase', ['ticket' => $ticket]);
+
         } else {
             return redirect()->back()->with('error', 'No available seats for this ticket!'); // Error message
         }
