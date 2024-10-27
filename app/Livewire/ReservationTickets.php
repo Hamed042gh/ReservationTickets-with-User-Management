@@ -3,35 +3,32 @@
 namespace App\Livewire;
 
 use App\Models\Ticket;
-use App\Models\Payment;
 use Livewire\Component;
 use App\Models\Reservation;
-use Livewire\WithPagination;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 
-class TicketReservation extends Component
+class ReservationTickets extends Component
 {
-    use WithPagination;
 
-    // Initial properties
     public $user;
     public $previewReservation = false;
     public $selectedTicket;
     public $reservationData = [];
-    public $searchByOrigin = '';
-    public $searchByDestination = '';
-    public $searchByReservation_date = '';
+
 
     public function mount()
     {
         $this->user = Auth::user(); // Get the authenticated user
     }
 
+
+    #[On('reserve')]
     public function handleMessageSubmission($ticketId)
     {
         $ticket = Ticket::findOrFail($ticketId);
         if (($ticket->available_count) < 1) {
-            session()->flash('error', 'No available seats for this ticket!');
+            $this->dispatch('showError', 'No available seats for this ticket!');
             return;
         }
         $this->selectedTicket = $ticket;
@@ -58,7 +55,7 @@ class TicketReservation extends Component
                 'reservation_date' => $ticket->departure_date,
             ]);
             $this->resetPreview();
-            session()->flash('message', 'Reserved successfully!');
+
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {
             return redirect()->back()->with('error', 'No available seats for this ticket!'); // Error message
@@ -73,38 +70,8 @@ class TicketReservation extends Component
         session()->flash('message', 'Reservation canceled!');
     }
 
-    public function search()
-    {
-        // Validate search input
-        $this->validate([
-            'searchByOrigin' => 'nullable|string|min:3',
-            'searchByDestination' => 'nullable|string|min:3',
-            'searchByReservation_date' => 'nullable|date',
-        ]);
-    }
-
     public function render()
     {
-        $query = Ticket::query();
-
-        // search && filters
-        if (!empty($this->searchByOrigin)) {
-            $query->where('origin', 'like', '%' . $this->searchByOrigin . '%');
-        }
-
-        if (!empty($this->searchByDestination)) {
-            $query->where('destination', 'like', '%' . $this->searchByDestination . '%');
-        }
-
-        if (!empty($this->searchByReservation_date)) {
-            $query->whereDate('departure_date', $this->searchByReservation_date);
-        }
-
-        // pagination
-        $tickets = $query->paginate(6);
-
-        return view('livewire.ticket-reservation', [
-            'tickets' => $tickets,
-        ]);
+        return view('livewire.reservation-tickets');
     }
 }

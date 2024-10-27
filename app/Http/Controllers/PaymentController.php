@@ -126,7 +126,8 @@ class PaymentController extends Controller
 
             $reservation = $payment->reservation;
             if ($reservation) {
-                $reservation->status = $reservationStatus;
+                $reservation->status = ReservationStatus::RESERVED->value;
+
                 $reservation->save();
                 $ticket = $reservation->ticket;
                 $availableTickets = $ticket->available_count;
