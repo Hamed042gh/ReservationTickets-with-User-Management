@@ -23,9 +23,7 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
+              
                 </div>
 
                 <!-- Navigation Links -->
@@ -34,6 +32,25 @@ new class extends Component
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+                @auth
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('tickets')" :active="request()->routeIs('dashboard')" wire:navigate>
+                        {{ __('Tickets') }}
+                    </x-nav-link>
+                </div>
+          
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('reservations')" :active="request()->routeIs('dashboard')" wire:navigate>
+                        {{ __('Reservations') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('finance')" :active="request()->routeIs('dashboard')" wire:navigate>
+                        {{ __('Finance') }}
+                    </x-nav-link>
+                </div>
+                @endauth
+              
             </div>
 
             <!-- Settings Dropdown -->
@@ -53,7 +70,7 @@ new class extends Component
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
+                            {{ __('Account Setting') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->

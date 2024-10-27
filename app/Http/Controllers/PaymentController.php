@@ -171,23 +171,23 @@ class PaymentController extends Controller
     {
         switch (PaymentStatus::from($status)) {
             case PaymentStatus::SUCCESS_CONFIRMED:
-                return redirect('/dashboard')->with('success', 'Your payment was made with the amount of ' . $amount . ' on ' . $paidAt);
+                return redirect('/tickets')->with('success', 'Your payment was made with the amount of ' . $amount . ' on ' . $paidAt);
             case PaymentStatus::SUCCESS_UNCONFIRMED:
-                return redirect('/dashboard')->withErrors(['payment' => 'Payment successful but not yet confirmed.']);
+                return redirect('/tickets')->withErrors(['payment' => 'Payment successful but not yet confirmed.']);
             case PaymentStatus::CANCELED_BY_USER:
-                return redirect('/dashboard')->withErrors(['payment' => 'Payment canceled by the user.']);
+                return redirect('/tickets')->withErrors(['payment' => 'Payment canceled by the user.']);
             case PaymentStatus::PENDING:
-                return redirect('/dashboard')->withErrors(['payment' => 'Payment is pending.']);
+                return redirect('/tickets')->withErrors(['payment' => 'Payment is pending.']);
             case PaymentStatus::INTERNAL_ERROR:
-                return redirect('/dashboard')->withErrors(['payment' => 'An internal error occurred.']);
+                return redirect('/tickets')->withErrors(['payment' => 'An internal error occurred.']);
             default:
-                return redirect('/dashboard')->withErrors(['payment' => 'Unknown payment status.']);
+                return redirect('/tickets')->withErrors(['payment' => 'Unknown payment status.']);
         }
     }
 
     protected function handleError(string $message)
     {
-        // بازگشت به صفحه داشبورد با پیام خطا
-        return redirect('/dashboard')->withErrors(['payment' => $message]);
+
+        return redirect('/tickets')->withErrors(['payment' => $message]);
     }
 }
