@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ticket_id')->constrained()->cascadeOnDelete();
-            $table->string('status')->default('pending');
+            $table->string('status')->default(0);
             $table->dateTime('reservation_date');
             $table->timestamps();
         });

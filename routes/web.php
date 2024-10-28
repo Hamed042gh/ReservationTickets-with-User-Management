@@ -17,13 +17,15 @@ Route::view('profile', 'profile')
 
 require __DIR__ . '/auth.php';
 
-Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
+
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
     Route::get('/purchase{ticket}', [TicketController::class, 'purchase'])->name('purchase');
-    Route::get('/reservations', [UserReservationsController ::class, 'showReservations'])->name('reservations');
-    Route::get('/finance', [UserReservationsController ::class, 'showFinance'])->name('finance');
+    Route::get('/reservations', [UserReservationsController::class, 'showReservations'])->name('reservations');
+    Route::get('/finance', [UserReservationsController::class, 'showFinance'])->name('finance');
 });
+
 Route::middleware(['auth'])->group(function () {
     Route::post('/payment/request', [PaymentController::class, 'requestPayment']);
     Route::get('/payment/callback', [PaymentController::class, 'verifyPayment']);

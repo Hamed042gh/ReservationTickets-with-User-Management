@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserReservationsController  extends Controller
 {
 
    public function showReservations()
    {
-      return view('userReservations.reservations');
+
+      $Reservations = Reservation::with('ticket')
+         ->where('user_id', Auth::id())
+         ->get();
+
+      return view('userReservations.reservations', compact('Reservations'));
    }
 
 
