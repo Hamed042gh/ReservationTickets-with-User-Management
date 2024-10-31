@@ -26,6 +26,9 @@ class ReservationTickets extends Component
     #[On('reserve')]
     public function handleMessageSubmission($ticketId)
     {
+        if (!$this->user) {
+            return redirect('/login');
+        }
         $ticket = Ticket::findOrFail($ticketId);
         if (($ticket->available_count) < 1) {
             $this->dispatch('showError', 'No available seats for this ticket!');

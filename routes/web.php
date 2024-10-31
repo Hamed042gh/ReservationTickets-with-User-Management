@@ -20,11 +20,12 @@ require __DIR__ . '/auth.php';
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
+
     Route::get('/purchase{ticket}', [TicketController::class, 'purchase'])->middleware('Check.Reservation')->name('purchase');
     Route::get('/reservations', [UserReservationsController::class, 'showReservations'])->name('reservations');
     Route::get('/finance', [UserReservationsController::class, 'showFinance'])->name('finance');
 });
+Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/payment/request', [PaymentController::class, 'requestPayment']);

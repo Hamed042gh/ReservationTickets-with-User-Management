@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
 
 class ShowTickets extends Component
 {
@@ -66,4 +67,7 @@ class ShowTickets extends Component
             'noTicketsMessage' => $tickets->isEmpty() ? 'no Tickets found!!' : null,
         ]);
     }
+
+
+
 }

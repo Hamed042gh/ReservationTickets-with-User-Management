@@ -17,6 +17,8 @@
                 class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-500 transition duration-200 w-full md:w-auto mr-1">
                 Search
             </button>
-            <a class="bg-green-600 text-white p-2 rounded-lg hover:bg-blue-500 transition duration-200 w-full md:w-auto mr-1" href="/dashboard">Dashboard</a>
+            @auth
+                <livewire:user-menu />
+            @endauth
         </div>
 </div>

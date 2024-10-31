@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 class SearchTickets extends Component
 {
@@ -29,6 +30,7 @@ class SearchTickets extends Component
             'date' => $this->searchByReservation_date,
         ]);
     }
+
     public function render()
     {
         return view('livewire.search-tickets');
