@@ -4,10 +4,7 @@
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
         Dashboard
     </a>
-    <a href=""  
-        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300 ml-2">
-        Extra Page
-    </a>
+
 </div>
 <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     @if ($Reservations->isEmpty())
@@ -39,14 +36,13 @@
                             <span class="font-bold">Status:</span>
                             <p class="mb-2 text-blue-600" style="color: red !important;">Canceled</p>
                         @elseif ($reservation->status == 0)
-                           
-                                <span class="font-bold">Status:</span>
-                                <p class="mb-2 text-yellow-600" style="color: rgb(0, 0, 0) !important;">Pending
-                                    <a class="w-full bg-yellow-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded transition duration-100"
-                                        href="{{ route('purchase', $reservation->ticket->id) }}">Reserve again</a>
-                                </p>
-                            @endif
-                    
+                            <span class="font-bold">Status:</span>
+                            <p class="mb-2 text-yellow-600" style="color: rgb(0, 0, 0) !important;">Pending
+                                <a class="w-full bg-yellow-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded transition duration-100"
+                                    href="{{ route('purchase', $reservation->ticket->id) }}">Reserve again</a>
+                            </p>
+                        @endif
+
                     </p>
                 </div>
             </div>
