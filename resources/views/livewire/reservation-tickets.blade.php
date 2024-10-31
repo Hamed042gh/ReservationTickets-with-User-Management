@@ -1,5 +1,7 @@
 <div>
+
     @if ($previewReservation)
+
         <div class="fixed z-10 inset-0 overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 transition-opacity">
@@ -18,6 +20,27 @@
                             <p>Price:{{ intval($selectedTicket->amount) }} ریال</p>
                         </div>
                     </div>
+                    @if (session('success'))
+                        <div class="bg-green-500 text-white p-4 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="bg-red-500 text-white p-4 rounded">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="bg-red-500 text-white p-4 rounded">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="button" wire:click="confirmReservation"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
