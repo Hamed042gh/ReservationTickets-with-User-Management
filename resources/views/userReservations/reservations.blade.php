@@ -39,25 +39,18 @@
                             <span class="font-bold">Status:</span>
                             <p class="mb-2 text-blue-600" style="color: red !important;">Canceled</p>
                         @elseif ($reservation->status == 0)
-                            @php
-
-                                $successfulReservation = $Reservations
-                                    ->where('ticket_id', $reservation->ticket->id)
-                                    ->where('status', 1)
-                                    ->first();
-                            @endphp
-
-                            @if (!$successfulReservation)
+                           
                                 <span class="font-bold">Status:</span>
                                 <p class="mb-2 text-yellow-600" style="color: rgb(0, 0, 0) !important;">Pending
                                     <a class="w-full bg-yellow-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded transition duration-100"
                                         href="{{ route('purchase', $reservation->ticket->id) }}">Reserve again</a>
                                 </p>
                             @endif
-                        @endif
+                    
                     </p>
                 </div>
             </div>
         @endforeach
     @endif
+    {{ $Reservations->links() }}
 </div>

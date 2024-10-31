@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Ticket;
 use App\Models\Payment;
+use App\Models\Reservation;
 use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 use App\Enums\ReservationStatus;
@@ -104,7 +106,9 @@ class PaymentController extends Controller
         }
 
         if ($inquiryResponse['status'] == PaymentStatus::SUCCESS_CONFIRMED->value) {
-            $this->updatePaymentAndReservationStatus($payment, ReservationStatus::RESERVED->value);
+            $reservation = $payment->reservation;
+            $ticket = $reservation->ticket;
+            $this->updatePaymentAndReservationStatus($payment, $reservation, $ticket);
         } else {
             $this->handleError('Payment was not successful.');
         }
@@ -117,26 +121,19 @@ class PaymentController extends Controller
         return $this->handlePaymentStatus($payment->status, $amount, $paidAt);
     }
 
-    protected function updatePaymentAndReservationStatus(Payment $payment, string $reservationStatus)
+    protected function updatePaymentAndReservationStatus(Payment $payment, Reservation $reservation, Ticket $ticket)
     {
 
-        DB::transaction(function () use ($payment, $reservationStatus) {
+        DB::transaction(function () use ($payment, $reservation, $ticket) {
+
             $payment->status = PaymentStatus::SUCCESS_CONFIRMED->value;
             $payment->save();
 
-            $reservation = $payment->reservation;
-            if ($reservation) {
-                $reservation->status = ReservationStatus::RESERVED->value;
+            $reservation->status = ReservationStatus::RESERVED->value;
+            $reservation->save();
 
-                $reservation->save();
-                $ticket = $reservation->ticket;
-                $availableTickets = $ticket->available_count;
-                if ($availableTickets > 0) {
-                    $availableTickets -= 1;
-                    $ticket->available_count = $availableTickets;
-                    $ticket->save();
-                }
-            }
+
+            $ticket->decrement('available_count');
         });
     }
 

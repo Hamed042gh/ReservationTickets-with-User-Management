@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use Livewire\Component;
 use App\Models\Reservation;
 use Livewire\Attributes\On;
+use App\Enums\ReservationStatus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
@@ -57,22 +58,31 @@ class ReservationTickets extends Component
     public function confirmReservation()
     {
         $ticket = $this->selectedTicket;
+        $userId = $this->user->id;
+        $hasReserved = Reservation::where('ticket_id', $ticket->id)
+            ->where('user_id', $userId )
+            ->where('status', ReservationStatus::RESERVED->value)
+            ->exists();
 
-        if ($ticket && ($ticket->available_count) >= 1) {
+        if ($hasReserved) {
 
+            return redirect()->back()->with('error', 'This ticket has already been reserved!');
+        }
+        if ($ticket && $ticket->available_count >= 1) {
 
             Reservation::create([
                 'user_id' => $this->user->id,
                 'ticket_id' => $ticket->id,
                 'reservation_date' => $ticket->departure_date,
             ]);
-            $this->resetPreview();
 
+
+            $this->resetPreview();
             $this->removeRedisLock();
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {
             $this->removeRedisLock();
-            return redirect()->back()->with('error', 'No available seats for this ticket!'); // Error message
+            return redirect()->back()->with('error', 'No available seats for this ticket!'); // پیغام خطا
         }
     }
 

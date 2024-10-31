@@ -14,7 +14,8 @@ class UserReservationsController  extends Controller
 
       $Reservations = Reservation::with('ticket')
          ->where('user_id', Auth::id())
-         ->get();
+         ->where('status', 1)
+         ->paginate(3);
 
       return view('userReservations.reservations', compact('Reservations'));
    }
