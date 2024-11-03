@@ -12,6 +12,7 @@ use App\Enums\ReservationStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\PaymentRequestStore;
 
 class PaymentController extends Controller
@@ -134,6 +135,7 @@ class PaymentController extends Controller
 
 
             $ticket->decrement('available_count');
+            Cache::forget('allTicketsShow');
         });
     }
 
