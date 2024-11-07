@@ -7,9 +7,8 @@ use Livewire\Component;
 use App\Models\Reservation;
 use Livewire\Attributes\On;
 use App\Enums\ReservationStatus;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redis;
+
 
 class ReservationTickets extends Component
 {
@@ -48,7 +47,7 @@ class ReservationTickets extends Component
 
         ];
 
-        if ($this->setRedisLock($ticket)) {
+        if ($ticket->available_count > 0) {
             $this->previewReservation = true;
         } else {
             $this->dispatch('showError', 'This ticket is currently being reserved by someone else. Please try again later.');
@@ -57,10 +56,12 @@ class ReservationTickets extends Component
 
     public function confirmReservation()
     {
+
         $ticket = $this->selectedTicket;
+
         $userId = $this->user->id;
         $hasReserved = Reservation::where('ticket_id', $ticket->id)
-            ->where('user_id', $userId )
+            ->where('user_id', $userId)
             ->where('status', ReservationStatus::RESERVED->value)
             ->exists();
 
@@ -78,11 +79,11 @@ class ReservationTickets extends Component
 
 
             $this->resetPreview();
-            $this->removeRedisLock();
+
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {
-            $this->removeRedisLock();
-            return redirect()->back()->with('error', 'No available seats for this ticket!'); // پیغام خطا
+
+            return redirect()->back()->with('error', 'No available seats for this ticket!');
         }
     }
 
@@ -92,30 +93,7 @@ class ReservationTickets extends Component
         $this->selectedTicket = null;
         $this->reservationData = [];
         session()->flash('message', 'Reservation canceled!');
-        $this->removeRedisLock();
     }
-
-    private function setRedisLock($ticket)
-    {
-        $this->lockKey = 'ticket_lock_' . $ticket->id;
-        $result = Redis::set($this->lockKey, 1, 'NX', 'EX', 30);
-        session(['lockKey' => $this->lockKey]);
-        Log::info("Lock key set: {$this->lockKey} is set");
-        return $result;
-    }
-
-    private function removeRedisLock()
-    {
-        $this->lockKey = session('lockKey');
-        if ($this->lockKey) {
-            if (Redis::exists($this->lockKey)) {
-                Redis::del($this->lockKey);
-                Log::info("Lock key delete: {$this->lockKey}");
-            }
-        }
-    }
-
-
 
     public function render()
     {

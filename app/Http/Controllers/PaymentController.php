@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use App\Http\Requests\PaymentRequestStore;
 
 class PaymentController extends Controller
@@ -100,6 +101,11 @@ class PaymentController extends Controller
         if (!$payment) {
             return $this->handleError('payment not found!');
         }
+        $ticket = $payment->reservation->ticket;
+
+        // Release the lock when payment fails
+        $lockKey = 'ticket_lock_' . $ticket->id;
+        Redis::del($lockKey);
 
         $inquiryResponse = $this->inquiry($trackId);
         if (!isset($inquiryResponse['status'], $inquiryResponse['amount'], $inquiryResponse['paidAt'])) {
@@ -138,7 +144,6 @@ class PaymentController extends Controller
             for ($i = 1; $i <= 2; $i++) {
                 Cache::forget('Cache:tickets_page_' . $i);
             }
-            
         });
     }
 
@@ -156,6 +161,11 @@ class PaymentController extends Controller
                 $reservation->save();
             }
         }
+        $ticket = $payment->reservation->ticket;
+
+        // Release the lock when payment fails
+        $lockKey = 'Lock:ticket_' . $ticket->id;
+        Redis::del($lockKey);
 
         return redirect('/tickets')->with('error', 'Payment failed. Please try again later.');
     }
