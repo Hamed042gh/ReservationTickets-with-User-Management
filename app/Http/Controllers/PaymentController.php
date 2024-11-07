@@ -135,7 +135,10 @@ class PaymentController extends Controller
 
 
             $ticket->decrement('available_count');
-            Cache::forget('allTicketsShow');
+            for ($i = 1; $i <= 2; $i++) {
+                Cache::forget('Cache:tickets_page_' . $i);
+            }
+            
         });
     }
 
