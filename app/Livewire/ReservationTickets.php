@@ -7,6 +7,7 @@ use Livewire\Component;
 use App\Models\Reservation;
 use Livewire\Attributes\On;
 use App\Enums\ReservationStatus;
+use App\Events\UpdateTicketsCount;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -77,8 +78,9 @@ class ReservationTickets extends Component
                 'reservation_date' => $ticket->departure_date,
             ]);
 
-
-            $this->resetPreview();
+          broadcast(new UpdateTicketsCount($this->user->id, $ticket));
+          
+           $this->resetPreview();
 
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {

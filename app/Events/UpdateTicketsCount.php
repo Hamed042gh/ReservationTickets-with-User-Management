@@ -34,7 +34,7 @@ class UpdateTicketsCount implements ShouldBroadcast
 
             'origin' => $this->ticket['origin'],
             'destination' => $this->ticket['destination'],
-            'departure' => $this->ticket['departure'],
+            'departure_date' => $this->ticket['departure_date'],
             'available_count' => $this->ticket['available_count'],
         ];
     }

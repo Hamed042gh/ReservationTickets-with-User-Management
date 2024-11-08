@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserReservationsController;
@@ -17,7 +18,7 @@ Route::view('profile', 'profile')
 
 require __DIR__ . '/auth.php';
 
-
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 Route::middleware(['auth'])->group(function () {
 
