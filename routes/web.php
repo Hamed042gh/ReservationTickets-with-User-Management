@@ -22,6 +22,7 @@ require __DIR__ . '/auth.php';
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/purchase{ticket}', [TicketController::class, 'purchase'])->middleware('Check.Reservation')->name('purchase');
+    Route::get('/cancelpurchase{ticket}', [TicketController::class, 'cancelPurchase'])->middleware('Check.Reservation')->name('cancelPurchase');
     Route::get('/reservations', [UserReservationsController::class, 'showReservations'])->name('reservations');
     Route::get('/finance', [UserReservationsController::class, 'showFinance'])->name('finance');
 });

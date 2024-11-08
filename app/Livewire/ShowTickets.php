@@ -3,10 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Ticket;
+use App\Services\CacheTickets;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Cache;
+
 
 class ShowTickets extends Component
 {
@@ -16,17 +17,21 @@ class ShowTickets extends Component
     public $searchByDestination = '';
     public $searchByDate = '';
 
+    // Initialize search parameters
     public function mount()
     {
         $this->resetSearch();
     }
 
+    // Reset search filters
     public function resetSearch()
     {
         $this->searchByOrigin = '';
         $this->searchByDestination = '';
         $this->searchByDate = '';
     }
+
+    // Handle updates to search filters
     #[On('searchTickets')]
     public function updatedSearch($searchMethod)
     {
@@ -35,18 +40,18 @@ class ShowTickets extends Component
         $this->searchByDate = $searchMethod['date'];
     }
 
-    public function render()
+
+    // Render tickets based on search or cache
+    public function render(CacheTickets $cacheTickets)
     {
-        $currentPage = request()->get('page', 1);
 
+        // If no search criteria, fetch tickets from cache
         if (empty($this->searchByOrigin) && empty($this->searchByDestination) && empty($this->searchByDate)) {
-            $cacheKey = 'Cache:tickets_page_' . $currentPage;
 
-            $tickets = Cache::remember($cacheKey, 600, function () {
-                return Ticket::paginate(6);
-            });
+            $tickets =  $cacheTickets->cacheShowTickets();
         } else {
 
+            // Filter tickets based on search criteria
             $query = Ticket::query();
 
             if (!empty($this->searchByOrigin)) {
@@ -61,7 +66,7 @@ class ShowTickets extends Component
 
             $tickets = $query->paginate(6);
         }
-
+        // Return tickets view with data
         return view('livewire.show-tickets', [
             'tickets' => $tickets,
             'noTicketsMessage' => $tickets->isEmpty() ? 'No tickets found!' : null,
