@@ -77,10 +77,9 @@ class ReservationTickets extends Component
                 'ticket_id' => $ticket->id,
                 'reservation_date' => $ticket->departure_date,
             ]);
+         
 
-          broadcast(new UpdateTicketsCount($this->user->id, $ticket));
-          
-           $this->resetPreview();
+            $this->resetPreview();
 
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {

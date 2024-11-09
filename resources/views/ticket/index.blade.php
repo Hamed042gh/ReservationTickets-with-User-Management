@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Ticket Reservation</title>
         @livewireStyles
+        @vite('resources/css/app.css')
         <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     </head>
 
@@ -32,12 +33,12 @@
                 </ul>
             </div>
         @endif
-
         <livewire:search-tickets />
         <livewire:show-tickets />
         <livewire:reservation-tickets />
 
         @livewireScripts
+        @vite('resources/js/app.js')
         <script>
             Livewire.on('showError', message => {
                 alert(message);

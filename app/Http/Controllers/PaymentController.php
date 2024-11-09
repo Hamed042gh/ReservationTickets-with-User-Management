@@ -9,6 +9,7 @@ use App\Models\Reservation;
 use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 use App\Enums\ReservationStatus;
+use App\Events\UpdateTicketsCount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -106,7 +107,7 @@ class PaymentController extends Controller
         // Release the lock when payment fails
         $lockKey = 'ticket_lock_' . $ticket->id;
         Redis::del($lockKey);
-
+      
         $inquiryResponse = $this->inquiry($trackId);
         if (!isset($inquiryResponse['status'], $inquiryResponse['amount'], $inquiryResponse['paidAt'])) {
             return $this->handleError('Invalid response from payment inquiry.');
@@ -130,22 +131,36 @@ class PaymentController extends Controller
 
     protected function updatePaymentAndReservationStatus(Payment $payment, Reservation $reservation, Ticket $ticket)
     {
-
         DB::transaction(function () use ($payment, $reservation, $ticket) {
-
-            $payment->status = PaymentStatus::SUCCESS_CONFIRMED->value;
-            $payment->save();
-
-            $reservation->status = ReservationStatus::RESERVED->value;
-            $reservation->save();
-
-
-            $ticket->decrement('available_count');
-            for ($i = 1; $i <= 2; $i++) {
-                Cache::forget('Cache:tickets_page_' . $i);
+            
+            // Set the lock at the beginning of the transaction
+            $lockKey = 'ticket_lock_' . $ticket->id;
+            Redis::set($lockKey, 'locked'); // قفل کردن بلیط
+    
+            try {
+                // Update payment and reservation status
+                $payment->status = PaymentStatus::SUCCESS_CONFIRMED->value;
+                $payment->save();
+    
+                $reservation->status = ReservationStatus::RESERVED->value;
+                $reservation->save();
+    
+                $ticket->decrement('available_count');
+    
+                // Broadcast event after all changes
+                broadcast(new UpdateTicketsCount($ticket))->toOthers();
+    
+                // Commit transaction if everything is fine
+                DB::commit();
+            } catch (\Exception $e) {
+                // If there is an error, rollback the transaction
+                DB::rollback();
+                Redis::del($lockKey); // Release the lock in case of error
+                throw $e; // Optionally rethrow the exception for further handling
             }
         });
     }
+    
 
     protected function handleFailedPayment($trackId)
     {
