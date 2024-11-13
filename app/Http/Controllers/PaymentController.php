@@ -183,7 +183,9 @@ class PaymentController extends Controller
         }
         $ticket = $payment->reservation->ticket;
 
-
+     // Remove the ticket lock
+                $lockKey = 'Lock:ticket_' . $ticket->id;
+                Redis::del($lockKey);
         return redirect('/tickets')->with('error', 'Payment failed. Please try again later.');
     }
 
