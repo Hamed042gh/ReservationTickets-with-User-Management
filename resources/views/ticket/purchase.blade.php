@@ -7,6 +7,11 @@
         <img src="{{ asset('images/ticket.png') }}" alt="Shaparak Logo" class="mx-auto w-32 h-auto">
     </div>
 
+    <!-- هشدار ده دقیقه -->
+    <div class="bg-yellow-500 text-black p-4 rounded mb-6">
+        <p class="text-lg font-semibold">You have only 10 minutes to complete your reservation!</p>
+    </div>
+
     <input type="hidden" name="ticket_id" id="ticket_id" value="{{ $ticket->id }}">
     <input type="hidden" name="amount" id="amount" value="{{ $ticket->amount }}">
     <input type="hidden" name="user_id" id="user_id" value="{{ auth()->user()->id }}">
@@ -38,4 +43,3 @@
     </div>
 
 </form>
-

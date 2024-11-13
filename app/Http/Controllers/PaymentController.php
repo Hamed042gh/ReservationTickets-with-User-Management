@@ -104,10 +104,7 @@ class PaymentController extends Controller
         }
         $ticket = $payment->reservation->ticket;
 
-        // Release the lock when payment fails
-        $lockKey = 'ticket_lock_' . $ticket->id;
-        Redis::del($lockKey);
-      
+
         $inquiryResponse = $this->inquiry($trackId);
         if (!isset($inquiryResponse['status'], $inquiryResponse['amount'], $inquiryResponse['paidAt'])) {
             return $this->handleError('Invalid response from payment inquiry.');
@@ -132,35 +129,43 @@ class PaymentController extends Controller
     protected function updatePaymentAndReservationStatus(Payment $payment, Reservation $reservation, Ticket $ticket)
     {
         DB::transaction(function () use ($payment, $reservation, $ticket) {
-            
-            // Set the lock at the beginning of the transaction
-            $lockKey = 'ticket_lock_' . $ticket->id;
-            Redis::set($lockKey, 'locked'); // قفل کردن بلیط
-    
             try {
                 // Update payment and reservation status
                 $payment->status = PaymentStatus::SUCCESS_CONFIRMED->value;
                 $payment->save();
-    
+
                 $reservation->status = ReservationStatus::RESERVED->value;
                 $reservation->save();
-    
+
                 $ticket->decrement('available_count');
-    
-                // Broadcast event after all changes
-                broadcast(new UpdateTicketsCount($ticket))->toOthers();
-    
+
                 // Commit transaction if everything is fine
                 DB::commit();
+
+                // After transaction commit, handle Redis and cache clearing
+                broadcast(new UpdateTicketsCount($ticket))->toOthers();
+
+                // Clear cache related to tickets
+                $keys = Redis::keys('Cache:tickets_page_*');
+                foreach ($keys as $key) {
+                    Redis::del($key);
+                }
+
+                // Remove the ticket lock
+                $lockKey = 'Lock:ticket_' . $ticket->id;
+                Redis::del($lockKey);
             } catch (\Exception $e) {
                 // If there is an error, rollback the transaction
                 DB::rollback();
-                Redis::del($lockKey); // Release the lock in case of error
+
+                // Release the lock in case of error
+                $lockKey = 'ticket_lock_' . $ticket->id;
+                Redis::del($lockKey);
+
                 throw $e; // Optionally rethrow the exception for further handling
             }
         });
     }
-    
 
     protected function handleFailedPayment($trackId)
     {
@@ -178,9 +183,6 @@ class PaymentController extends Controller
         }
         $ticket = $payment->reservation->ticket;
 
-        // Release the lock when payment fails
-        $lockKey = 'Lock:ticket_' . $ticket->id;
-        Redis::del($lockKey);
 
         return redirect('/tickets')->with('error', 'Payment failed. Please try again later.');
     }

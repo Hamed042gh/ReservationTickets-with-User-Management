@@ -7,7 +7,7 @@ use Livewire\Component;
 use App\Models\Reservation;
 use Livewire\Attributes\On;
 use App\Enums\ReservationStatus;
-use App\Events\UpdateTicketsCount;
+use App\Services\LockTicket;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -18,48 +18,56 @@ class ReservationTickets extends Component
     public $previewReservation = false;
     public $selectedTicket;
     public $reservationData = [];
-    private $lockKey;
+
 
     public function mount()
     {
         $this->user = Auth::user(); // Get the authenticated user
     }
 
-
+    // Handle the reservation request when user submits the "reserve" action
     #[On('reserve')]
-    public function handleMessageSubmission($ticketId)
+    public function handleMessageSubmission($ticketId, LockTicket $lockTicket)
     {
         if (!$this->user) {
             return redirect('/login');
         }
 
-
         $ticket = Ticket::findOrFail($ticketId);
 
-        if (($ticket->available_count) < 1) {
-            $this->dispatch('showError', 'No available seats for this ticket!');
-            return;
-        }
-        $this->selectedTicket = $ticket;
-        $this->reservationData = [
-            'user_id' => $this->user->id,
-            'ticket_id' => $ticketId,
-            'reservation_date' => $ticket->departure_date,
-
-        ];
-
-        if ($ticket->available_count > 0) {
-            $this->previewReservation = true;
+        if ($this->isTicketAvailable($ticket)) {
+            $this->setReservationData($ticket);
+            if ($lockTicket->setRedisLock($ticket)) {
+                $this->previewReservation = true;
+            } else {
+                $this->dispatch('showError', 'This ticket is currently being reserved by someone else. Please try again later.');
+            }
         } else {
-            $this->dispatch('showError', 'This ticket is currently being reserved by someone else. Please try again later.');
+            $this->dispatch('showError', 'No available seats for this ticket!');
         }
     }
 
-    public function confirmReservation()
+    // Helper function to check if a ticket is available
+    private function isTicketAvailable($ticket)
     {
+        return $ticket->available_count > 0;
+    }
 
+    // Set the reservation data based on the selected ticket
+    private function setReservationData($ticket)
+    {
+        $this->selectedTicket = $ticket;
+        $this->reservationData = [
+            'user_id' => $this->user->id,
+            'ticket_id' => $ticket->id,
+            'reservation_date' => $ticket->departure_date,
+        ];
+    }
+
+    // Confirm the reservation and create the reservation record
+    public function confirmReservation(LockTicket $lockTicket)
+    {
         $ticket = $this->selectedTicket;
-
         $userId = $this->user->id;
         $hasReserved = Reservation::where('ticket_id', $ticket->id)
             ->where('user_id', $userId)
@@ -77,23 +85,27 @@ class ReservationTickets extends Component
                 'ticket_id' => $ticket->id,
                 'reservation_date' => $ticket->departure_date,
             ]);
-         
-
-            $this->resetPreview();
 
             return redirect()->route('purchase', ['ticket' => $ticket]);
         } else {
-
-            return redirect()->back()->with('error', 'No available seats for this ticket!');
+            // If ticket is no longer available, remove the Redis lock and show an error
+            $lockTicket->removeRedisLock($ticket);
+            return redirect()->back()->with('error', 'No available seats for this ticket!'); // پیغام خطا
         }
     }
 
-    public function resetPreview()
+    // Reset the reservation preview and clear the selected ticket
+    public function resetPreview(LockTicket $lockTicket)
     {
         $this->previewReservation = false;
-        $this->selectedTicket = null;
+
         $this->reservationData = [];
         session()->flash('message', 'Reservation canceled!');
+        if ($this->selectedTicket) {
+            // Remove the Redis lock for the ticket and reset selected ticket
+            $lockTicket->removeRedisLock($this->selectedTicket);
+            $this->selectedTicket = null;
+        }
     }
 
     public function render()
