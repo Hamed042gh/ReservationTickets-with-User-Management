@@ -10,6 +10,7 @@ use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 use App\Enums\ReservationStatus;
 use App\Events\UpdateTicketsCount;
+use App\Jobs\SendReservationEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -145,6 +146,7 @@ class PaymentController extends Controller
                 // After transaction commit, handle Redis and cache clearing
                 broadcast(new UpdateTicketsCount($ticket))->toOthers();
 
+
                 // Clear cache related to tickets
                 $keys = Redis::keys('Cache:tickets_page_*');
                 foreach ($keys as $key) {
@@ -165,6 +167,11 @@ class PaymentController extends Controller
                 throw $e; // Optionally rethrow the exception for further handling
             }
         });
+        
+        //sending email related reservation
+        $user = $payment->user;
+        $reservation = $payment->reservation;
+        SendReservationEmail::dispatch($user, $reservation);
     }
 
     protected function handleFailedPayment($trackId)
@@ -183,9 +190,9 @@ class PaymentController extends Controller
         }
         $ticket = $payment->reservation->ticket;
 
-     // Remove the ticket lock
-                $lockKey = 'Lock:ticket_' . $ticket->id;
-                Redis::del($lockKey);
+        // Remove the ticket lock
+        $lockKey = 'Lock:ticket_' . $ticket->id;
+        Redis::del($lockKey);
         return redirect('/tickets')->with('error', 'Payment failed. Please try again later.');
     }
 
