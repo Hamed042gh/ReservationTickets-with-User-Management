@@ -27,4 +27,6 @@ class TicketController extends Controller
         $lockTicket->removeRedisLock($ticket);
         return redirect('/tickets');
     }
+
+  
 }

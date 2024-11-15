@@ -44,9 +44,17 @@
                         @endif
 
                     </p>
+                    <p>
+                        <a href=""> edit</a>
+                        <form action="{{ route('deleteReservation', $reservation->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                        </form>
+                    </p>
                 </div>
             </div>
-        @endforeach
-    @endif
-    {{ $Reservations->links() }}
+ @endforeach
+        @endif
+        {{ $Reservations->links() }}
 </div>

@@ -31,6 +31,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cancelpurchase{ticket}', [TicketController::class, 'cancelPurchase'])->middleware('Check.Reservation')->name('cancelPurchase');
     Route::get('/reservations', [UserReservationsController::class, 'showReservations'])->name('reservations');
     Route::get('/finance', [UserReservationsController::class, 'showFinance'])->name('finance');
+    Route::delete('/delete/{id}', [UserReservationsController::class, 'deleteReservation'])->name('deleteReservation');
+
 });
 Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
 

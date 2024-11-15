@@ -7,27 +7,36 @@ use App\Models\Ticket;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Enums\PaymentStatus;
+use App\Services\LockTicket;
 use Illuminate\Http\Request;
+use App\Services\CacheTickets;
+use App\Services\ZibalService;
 use App\Enums\ReservationStatus;
 use App\Events\UpdateTicketsCount;
 use App\Jobs\SendReservationEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 use App\Http\Requests\PaymentRequestStore;
 
 class PaymentController extends Controller
 {
-    private const ZIBAL_API_REQUEST = 'https://gateway.zibal.ir/v1/request';
-    private const ZIBAL_API_VERIFY = 'https://gateway.zibal.ir/v1/verify';
-    private const ZIBAL_API_INQUIRY = 'https://gateway.zibal.ir/v1/inquiry';
-    private const CALLBACK_URL = 'http://localhost/payment/callback';
+    private $cacheTickets;
+    private $lockTicket;
+    private $zibalService;
+
+    public function __construct(CacheTickets $cacheTickets, LockTicket $lockTicket, ZibalService $zibalService)
+    {
+        $this->cacheTickets = $cacheTickets;
+        $this->lockTicket = $lockTicket;
+        $this->zibalService = $zibalService;
+    }
 
     public function requestPayment(PaymentRequestStore $request)
     {
-        $zibalResponse = $this->sendRequestToZibal($request);
+        $zibalResponse = $this->zibalService->sendRequestToZibal(
+            $request->input('amount'),
+            $request->input('ticket_id')
+        );
 
         if (isset($zibalResponse['trackId'])) {
             $this->storePayment($request, $zibalResponse['trackId']);
@@ -37,18 +46,7 @@ class PaymentController extends Controller
         return $this->handleError('Error in payment system!');
     }
 
-    private function sendRequestToZibal(PaymentRequestStore $request)
-    {
-        $response =  Http::post(self::ZIBAL_API_REQUEST, [
-            'merchant' => 'zibal',
-            'amount' => $request->input('amount'),
-            'ticket_id' => $request->input('ticket_id'),
-            'callbackUrl' => self::CALLBACK_URL,
-            'description' => 'Order payment',
-        ])->json();
 
-        return $response;
-    }
 
     private function storePayment(PaymentRequestStore $request, string $trackId)
     {
@@ -70,7 +68,7 @@ class PaymentController extends Controller
         $success = $request->input('success');
 
         if ($success == '1') {
-            $verifyResponse = $this->verifyPaymentWithZibal($trackId);
+            $verifyResponse = $this->zibalService->verifyPaymentWithZibal($trackId);
 
             if ($verifyResponse['result'] == 100) {
 
@@ -81,20 +79,6 @@ class PaymentController extends Controller
         return $this->handleFailedPayment($trackId);
     }
 
-    protected function verifyPaymentWithZibal($trackId)
-    {
-        $response = Http::post(self::ZIBAL_API_VERIFY, [
-            'merchant' => 'zibal',
-            'trackId' => $trackId,
-        ])->json();
-        if (isset($response['error'])) {
-            return [
-                'result' => 0,
-                'message' => $response['error'],
-            ];
-        }
-        return $response;
-    }
 
     protected function handleSuccessfulPayment($trackId)
     {
@@ -106,7 +90,7 @@ class PaymentController extends Controller
         $ticket = $payment->reservation->ticket;
 
 
-        $inquiryResponse = $this->inquiry($trackId);
+        $inquiryResponse = $this->zibalService->inquiry($trackId);
         if (!isset($inquiryResponse['status'], $inquiryResponse['amount'], $inquiryResponse['paidAt'])) {
             return $this->handleError('Invalid response from payment inquiry.');
         }
@@ -114,6 +98,7 @@ class PaymentController extends Controller
         if ($inquiryResponse['status'] == PaymentStatus::SUCCESS_CONFIRMED->value) {
             $reservation = $payment->reservation;
             $ticket = $reservation->ticket;
+
             $this->updatePaymentAndReservationStatus($payment, $reservation, $ticket);
         } else {
             $this->handleError('Payment was not successful.');
@@ -148,21 +133,16 @@ class PaymentController extends Controller
 
 
                 // Clear cache related to tickets
-                $keys = Redis::keys('Cache:tickets_page_*');
-                foreach ($keys as $key) {
-                    Redis::del($key);
-                }
+                $this->cacheTickets->clearCache();
 
                 // Remove the ticket lock
-                $lockKey = 'Lock:ticket_' . $ticket->id;
-                Redis::del($lockKey);
+                $this->lockTicket->removeRedisLock($ticket);
             } catch (\Exception $e) {
                 // If there is an error, rollback the transaction
                 DB::rollback();
 
                 // Release the lock in case of error
-                $lockKey = 'ticket_lock_' . $ticket->id;
-                Redis::del($lockKey);
+                $this->lockTicket->removeRedisLock($ticket);
 
                 throw $e; // Optionally rethrow the exception for further handling
             }
@@ -191,43 +171,33 @@ class PaymentController extends Controller
         $ticket = $payment->reservation->ticket;
 
         // Remove the ticket lock
-        $lockKey = 'Lock:ticket_' . $ticket->id;
-        Redis::del($lockKey);
+        $this->lockTicket->removeRedisLock($ticket);
         return redirect('/tickets')->with('error', 'Payment failed. Please try again later.');
     }
 
-    protected function inquiry($trackId)
-    {
-        $response = Http::post(self::ZIBAL_API_INQUIRY, [
-            'merchant' => 'zibal',
-            'trackId' => $trackId,
-        ])->json();
-
-        return $response;
-    }
 
     protected function handlePaymentStatus(int $status, $amount, $paidAt)
-{
-    return match (PaymentStatus::from($status)) {
-        PaymentStatus::SUCCESS_CONFIRMED => 
+    {
+        return match (PaymentStatus::from($status)) {
+            PaymentStatus::SUCCESS_CONFIRMED =>
             redirect('/tickets')->with('success', 'Your payment was made with the amount of ' . $amount . ' on ' . $paidAt),
 
-        PaymentStatus::SUCCESS_UNCONFIRMED => 
+            PaymentStatus::SUCCESS_UNCONFIRMED =>
             redirect('/tickets')->withErrors(['payment' => 'Payment successful but not yet confirmed.']),
 
-        PaymentStatus::CANCELED_BY_USER => 
+            PaymentStatus::CANCELED_BY_USER =>
             redirect('/tickets')->withErrors(['payment' => 'Payment canceled by the user.']),
 
-        PaymentStatus::PENDING => 
+            PaymentStatus::PENDING =>
             redirect('/tickets')->withErrors(['payment' => 'Payment is pending.']),
 
-        PaymentStatus::INTERNAL_ERROR => 
+            PaymentStatus::INTERNAL_ERROR =>
             redirect('/tickets')->withErrors(['payment' => 'An internal error occurred.']),
 
-        default => 
+            default =>
             redirect('/tickets')->withErrors(['payment' => 'Unknown payment status.']),
-    };
-}
+        };
+    }
 
 
     protected function handleError(string $message)
