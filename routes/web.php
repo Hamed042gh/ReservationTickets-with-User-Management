@@ -6,7 +6,12 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserReservationsController;
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    return cache()->remember('home_page', now()->addMinutes(60), function () {
+        return view('welcome')->render();
+    });
+});
+
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

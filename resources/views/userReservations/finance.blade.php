@@ -1,8 +1,20 @@
 <link href="{{ asset('css/output.css') }}" rel="stylesheet">
 <div class="mb-4">
-    <a href="/dashboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Dashboard</a>
-    <a href="/reservations" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">My Reservations</a>
-    <a href="/tickets" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-700">Create New Reservation</a>
+    <div class="mb-4 flex space-x-4">
+        <a href="{{route('tickets')}}" 
+           class="bg-orange-300 text-black px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-400 hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+            Create New Reservation
+        </a>
+        <a href="{{route('dashboard')}}" 
+           class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+            Dashboard
+        </a>
+        <a href="{{route('reservations')}}" 
+           class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-green-700 hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+            My Reservations
+        </a>
+    </div>
+    
 </div>
 <table class="min-w-full border-collapse border border-gray-300">
     <thead>
@@ -28,27 +40,15 @@
                 <td class="border border-gray-300 px-4 py-2 bg-pink-100">
                     {{ $payment->reservation->ticket->destination }}</td>
                 <td class="border border-gray-300 px-4 py-2 bg-teal-100">
-                    @switch($payment->status)
-                        @case(\App\Enums\PaymentStatus::SUCCESS_CONFIRMED->value)
-                            Paid
-                        @break
-
-                        @case(\App\Enums\PaymentStatus::PENDING->value)
-                            Processing
-                        @break
-
-                        @case(\App\Enums\PaymentStatus::INTERNAL_ERROR->value)
-                            Internal Error
-                        @break
-
-                        @case(\App\Enums\PaymentStatus::CANCELED_BY_USER->value)
-                            Canceled
-                        @break
-
-                        @default
-                            Unknown Status
-                    @endswitch
+                    {{ match (\App\Enums\PaymentStatus::from($payment->status)) {
+                        \App\Enums\PaymentStatus::SUCCESS_CONFIRMED => 'Paid',
+                        \App\Enums\PaymentStatus::PENDING => 'Processing',
+                        \App\Enums\PaymentStatus::INTERNAL_ERROR => 'Internal Error',
+                        \App\Enums\PaymentStatus::CANCELED_BY_USER => 'Canceled',
+                        default => 'Unknown Status',
+                    } }}
                 </td>
+
             </tr>
         @endforeach
     </tbody>

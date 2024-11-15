@@ -167,7 +167,7 @@ class PaymentController extends Controller
                 throw $e; // Optionally rethrow the exception for further handling
             }
         });
-        
+
         //sending email related reservation
         $user = $payment->user;
         $reservation = $payment->reservation;
@@ -207,22 +207,28 @@ class PaymentController extends Controller
     }
 
     protected function handlePaymentStatus(int $status, $amount, $paidAt)
-    {
-        switch (PaymentStatus::from($status)) {
-            case PaymentStatus::SUCCESS_CONFIRMED:
-                return redirect('/tickets')->with('success', 'Your payment was made with the amount of ' . $amount . ' on ' . $paidAt);
-            case PaymentStatus::SUCCESS_UNCONFIRMED:
-                return redirect('/tickets')->withErrors(['payment' => 'Payment successful but not yet confirmed.']);
-            case PaymentStatus::CANCELED_BY_USER:
-                return redirect('/tickets')->withErrors(['payment' => 'Payment canceled by the user.']);
-            case PaymentStatus::PENDING:
-                return redirect('/tickets')->withErrors(['payment' => 'Payment is pending.']);
-            case PaymentStatus::INTERNAL_ERROR:
-                return redirect('/tickets')->withErrors(['payment' => 'An internal error occurred.']);
-            default:
-                return redirect('/tickets')->withErrors(['payment' => 'Unknown payment status.']);
-        }
-    }
+{
+    return match (PaymentStatus::from($status)) {
+        PaymentStatus::SUCCESS_CONFIRMED => 
+            redirect('/tickets')->with('success', 'Your payment was made with the amount of ' . $amount . ' on ' . $paidAt),
+
+        PaymentStatus::SUCCESS_UNCONFIRMED => 
+            redirect('/tickets')->withErrors(['payment' => 'Payment successful but not yet confirmed.']),
+
+        PaymentStatus::CANCELED_BY_USER => 
+            redirect('/tickets')->withErrors(['payment' => 'Payment canceled by the user.']),
+
+        PaymentStatus::PENDING => 
+            redirect('/tickets')->withErrors(['payment' => 'Payment is pending.']),
+
+        PaymentStatus::INTERNAL_ERROR => 
+            redirect('/tickets')->withErrors(['payment' => 'An internal error occurred.']),
+
+        default => 
+            redirect('/tickets')->withErrors(['payment' => 'Unknown payment status.']),
+    };
+}
+
 
     protected function handleError(string $message)
     {

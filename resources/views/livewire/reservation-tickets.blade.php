@@ -41,6 +41,10 @@
                             </ul>
                         </div>
                     @endif
+                    <!-- 10 min warning-->
+                    <div class="bg-yellow-500 text-black p-4 rounded mb-6">
+                        <p class="text-lg font-semibold">You have only 10 minutes to complete your reservation!</p>
+                    </div>
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="button" wire:click="confirmReservation"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-500 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
