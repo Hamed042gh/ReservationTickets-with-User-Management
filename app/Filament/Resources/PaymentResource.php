@@ -51,7 +51,7 @@ class PaymentResource extends Resource
 
 
                 TextColumn::make('user.name')
-                    ->label('userName')
+                    ->label('Name')
                     ->sortable()
                     ->searchable(),
 
