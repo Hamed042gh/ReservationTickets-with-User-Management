@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,6 +23,7 @@ class PaymentFactory extends Factory
             'payer_identity' => $this->faker->email,
             'status' => 'pending',
             'user_id' => User::factory(),
+            'reservation_id' => Reservation::factory(),
         ];
     }
 }
