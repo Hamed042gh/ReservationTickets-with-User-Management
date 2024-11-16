@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Ticket;
+
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Reservation;
@@ -18,48 +18,55 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\ReservationResource\Pages\EditReservation;
 use App\Filament\Resources\ReservationResource\Pages\ListReservations;
 use App\Filament\Resources\ReservationResource\Pages\CreateReservation;
-use App\Filament\Resources\ReservationResource\RelationManagers\ReservationUserRelationManager;
 
 
 class ReservationResource extends Resource
 {
+    // Define the model associated with this resource (Reservation model in this case)
     protected static ?string $model = Reservation::class;
 
+    // The navigation icon that will appear in the Filament panel for this resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /**
+     * Define the form schema for creating or editing Reservation records.
+     * This method defines the form fields, validation rules, and input types.
+     *
+     * @param Form $form
+     * @return Form
+     */
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // Input for 'origin' field, required
+                // Input for 'user_id' field, required
                 TextInput::make('user_id')
                     ->required()
                     ->label('user_id'),
 
-                // Input for 'destination' field, required
+                // Input for 'ticket_id' field, required
                 TextInput::make('ticket_id')
                     ->required()
                     ->label('ticket_id'),
 
-                // DateTime picker for 'departure_date', required
+                // DateTime picker for 'reservation_date', required, with specific date-time format
                 DateTimePicker::make('reservation_date')
                     ->required()
                     ->label('reservation_date')
                     ->displayFormat('Y-m-d H:i:s'),
 
-                // Input for 'amount', required, numeric with minimum value 0
+                // Input for 'status' field, required, numeric with minimum value 0
                 TextInput::make('status')
                     ->required()
                     ->label('status')
                     ->numeric()
                     ->minValue(0),
-
-
             ]);
     }
 
     /**
-     * Define the table view for listing tickets.
+     * Define the table view for listing Reservation records.
+     * This method sets up columns, filters, and actions for the table display.
      *
      * @param Table $table
      * @return Table
@@ -67,48 +74,57 @@ class ReservationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                // Column for 'origin', sortable and searchable
+            ->columns([  // Define the columns to be displayed in the table
 
-                TextColumn::make('user_id')->label('user_id')->sortable()
-                    ->searchable(),
+                // Column for 'user_id', sortable and searchable
+                TextColumn::make('user_id')
+                    ->label('user_id')  // Label for the column
+                    ->sortable()         // Sorting is enabled for this column
+                    ->searchable(),      // Searching is enabled for this column
 
-                // Column for 'destination', sortable and searchable
-                TextColumn::make('ticket_id')->label('ticket_id')->sortable()
-                    ->searchable(),
+                // Column for 'ticket_id', sortable and searchable
+                TextColumn::make('ticket_id')
+                    ->label('ticket_id')  // Label for the column
+                    ->sortable()          // Sorting is enabled for this column
+                    ->searchable(),       // Searching is enabled for this column
 
+                // Column for 'reservation_date', formatted as a date, sortable and searchable
+                TextColumn::make('reservation_date')
+                    ->label('reservation_date')  // Label for the column
+                    ->date('Y-m-d')              // Date format for the reservation date
+                    ->sortable()                 // Sorting is enabled for this column
+                    ->searchable(),             // Searching is enabled for this column
 
-                // Column for 'departure_date', sortable and searchable, formatted as date
-                TextColumn::make('reservation_date')->label('reservation_date')->date('Y-m-d')->sortable()
-                    ->searchable(),
-
-                // Column for 'available_count', sortable and searchable
-                TextColumn::make('status')->label('status')->sortable()
-                    ->searchable(),
-
+                // Column for 'status', sortable and searchable
+                TextColumn::make('status')
+                    ->label('status')   // Label for the column
+                    ->sortable()        // Sorting is enabled for this column
+                    ->searchable(),     // Searching is enabled for this column
             ])
-            ->filters([
-                // Filter for 'origin' field with options for Iranian provinces
-                SelectFilter::make('status')
-                    ->label('status')
-                    ->options([
-                        0 => 'pending',
-                        -1 => 'canceled',
-                        1 => 'reserved'
+            ->filters([  // Filters to narrow down the results displayed in the table
+
+                // Filter for 'status' field with options for different statuses
+                SelectFilter::make('status')  // Filter for 'status'
+                    ->label('status')           // Label for the filter
+                    ->options([                 // Options available for the filter
+                        0 => 'pending',          // Option for 'pending' status
+                        -1 => 'canceled',        // Option for 'canceled' status
+                        1 => 'reserved'          // Option for 'reserved' status
                     ]),
-
             ])
-            ->actions([
-                // Action for editing a ticket
+            ->actions([  // Actions that can be performed on individual records
+
+                // Action for editing a Reservation record
                 EditAction::make(),
 
-                // Action for deleting a ticket
+                // Action for deleting a Reservation record
                 DeleteAction::make(),
             ])
-            ->bulkActions([
-                // Bulk action for deleting multiple tickets
+            ->bulkActions([  // Bulk actions that can be performed on multiple records
+
+                // Group of bulk actions, currently includes only the delete action
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make(),  // Action for deleting multiple records
                 ]),
             ]);
     }
@@ -120,15 +136,21 @@ class ReservationResource extends Resource
      */
     public static function getRelations(): array
     {
-        return [];
+        return [];  // No relationships are defined for this resource.
     }
 
+    /**
+     * Define the pages for this resource.
+     * This method defines the routes for viewing, creating, and editing Reservation records.
+     *
+     * @return array
+     */
     public static function getPages(): array
     {
         return [
-            'index' => ListReservations::route('/'),
-            'create' => CreateReservation::route('/create'),
-            'edit' => EditReservation::route('/{record}/edit'),
+            'index' => ListReservations::route('/'),  // The page to list Reservation records
+            'create' => CreateReservation::route('/create'),  // The page to create a new Reservation
+            'edit' => EditReservation::route('/{record}/edit'),  // The page to edit an existing Reservation
         ];
     }
 }

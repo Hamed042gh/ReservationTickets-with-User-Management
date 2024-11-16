@@ -82,21 +82,32 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 // Column for 'origin', sortable and searchable
-                TextColumn::make('origin')->label('origin')->sortable()
+                TextColumn::make('origin')
+                    ->label('origin')
+                    ->sortable()
                     ->searchable(),
 
                 // Column for 'destination', sortable and searchable
-                TextColumn::make('destination')->label('destination')->sortable()
+                TextColumn::make('destination')
+                    ->label('destination')
+                    ->sortable()
                     ->searchable(),
 
                 // Column for 'departure_date', sortable and searchable, formatted as date
-                TextColumn::make('departure_date')->label('departure_date')->date('Y-m-d')->sortable()
+                TextColumn::make('departure_date')
+                    ->label('departure_date')
+                    ->date('Y-m-d')
+                    ->sortable()
                     ->searchable(),
 
                 // Column for 'available_count', sortable and searchable
-                TextColumn::make('available_count')->label('available_count')->sortable()
+                TextColumn::make('available_count')
+                    ->label('available_count')
+                    ->sortable()
                     ->searchable(),
-                TextColumn::make('amount')->label('amount')->sortable()
+                TextColumn::make('amount')
+                    ->label('amount')
+                    ->sortable()
                     ->searchable(),
             ])
             ->filters([
