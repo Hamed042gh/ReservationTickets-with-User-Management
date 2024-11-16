@@ -29,8 +29,10 @@
 
     <div class="mt-6">
         <h3 class="text-lg font-semibold mb-4">About Our Tickets</h3>
-        <p class="mb-2">We offer a variety of tickets for different events. Whether you're looking for concerts, sports, or theatre, we have something for everyone!</p>
-        <p class="mb-2">All our tickets are available for immediate reservation or purchase. Make sure to check the availability before proceeding!</p>
+        <p class="mb-2">We offer a variety of tickets for different events. Whether you're looking for concerts,
+            sports, or theatre, we have something for everyone!</p>
+        <p class="mb-2">All our tickets are available for immediate reservation or purchase. Make sure to check the
+            availability before proceeding!</p>
         <p class="mb-2">For any assistance, feel free to contact our support team.</p>
         <p class="mb-4">Stay tuned for upcoming events and special offers!</p>
     </div>
