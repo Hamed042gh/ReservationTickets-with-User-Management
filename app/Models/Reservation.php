@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Models\Ticket;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Reservation extends Model
 {
+  use HasFactory;
     protected $fillable = [
 
         'user_id',
