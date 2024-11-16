@@ -45,7 +45,7 @@
 
                     </p>
                     <p>
-                        <a href=""> edit</a>
+                        {{-- <a href=""> edit</a> --}}
                         <form action="{{ route('deleteReservation', $reservation->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
