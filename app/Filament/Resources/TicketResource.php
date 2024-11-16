@@ -2,17 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TicketResource\Pages;
-use App\Filament\Resources\TicketResource\RelationManagers;
+
 use App\Models\Ticket;
-use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TextFilter;
-use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Actions\DeleteBulkAction;
+use App\Filament\Resources\TicketResource\Pages;
+use App\Filament\Resources\TicketResource\Pages\EditTicket;
+use App\Filament\Resources\TicketResource\Pages\ListTickets;
+use App\Filament\Resources\TicketResource\Pages\CreateTicket;
+
 
 class TicketResource extends Resource
 {
@@ -33,30 +40,30 @@ class TicketResource extends Resource
         return $form
             ->schema([
                 // Input for 'origin' field, required
-                Forms\Components\TextInput::make('origin')
+                TextInput::make('origin')
                     ->required()
                     ->label('origin'),
-                
+
                 // Input for 'destination' field, required
-                Forms\Components\TextInput::make('destination')
+                TextInput::make('destination')
                     ->required()
                     ->label('destination'),
 
                 // DateTime picker for 'departure_date', required
-                Forms\Components\DateTimePicker::make('departure_date')
+                DateTimePicker::make('departure_date')
                     ->required()
                     ->label('departure_date')
                     ->displayFormat('Y-m-d H:i:s'),
 
                 // Input for 'amount', required, numeric with minimum value 0
-                Forms\Components\TextInput::make('amount')
+                TextInput::make('amount')
                     ->required()
                     ->label('amount')
                     ->numeric()
                     ->minValue(0),
 
                 // Input for 'available_count', required, numeric with minimum value 0
-                Forms\Components\TextInput::make('available_count')
+                TextInput::make('available_count')
                     ->required()
                     ->label('available_count')
                     ->numeric()
@@ -75,21 +82,21 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 // Column for 'origin', sortable and searchable
-                Tables\Columns\TextColumn::make('origin')->label('origin')->sortable()
+                TextColumn::make('origin')->label('origin')->sortable()
                     ->searchable(),
-                
+
                 // Column for 'destination', sortable and searchable
-                Tables\Columns\TextColumn::make('destination')->label('destination')->sortable()
+                TextColumn::make('destination')->label('destination')->sortable()
                     ->searchable(),
 
                 // Column for 'departure_date', sortable and searchable, formatted as date
-                Tables\Columns\TextColumn::make('departure_date')->label('departure_date')->date('Y-m-d')->sortable()
+                TextColumn::make('departure_date')->label('departure_date')->date('Y-m-d')->sortable()
                     ->searchable(),
 
                 // Column for 'available_count', sortable and searchable
-                Tables\Columns\TextColumn::make('available_count')->label('available_count')->sortable()
+                TextColumn::make('available_count')->label('available_count')->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')->label('amount')->sortable()
+                TextColumn::make('amount')->label('amount')->sortable()
                     ->searchable(),
             ])
             ->filters([
@@ -167,15 +174,6 @@ class TicketResource extends Resource
                         'Zanjan' => 'Zanjan',
                     ]),
 
-                // Filter for 'amount' field with ranges of prices
-                SelectFilter::make('amount')
-                    ->label('Amount')
-                    ->options([
-                        '1000-50000' => '10000 - 50000',
-                        '51000-100000' => '51000 - 100000',
-                        '101000-200000' => '101000 - 200000',
-                        '200000+' => '200000+',
-                    ]),
 
                 // Filter for 'available_count' field with ranges for available tickets
                 SelectFilter::make('available_count')
@@ -189,15 +187,15 @@ class TicketResource extends Resource
             ])
             ->actions([
                 // Action for editing a ticket
-                Tables\Actions\EditAction::make(),
-                
+                EditAction::make(),
+
                 // Action for deleting a ticket
-                Tables\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 // Bulk action for deleting multiple tickets
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -209,9 +207,7 @@ class TicketResource extends Resource
      */
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     /**
@@ -222,9 +218,9 @@ class TicketResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTickets::route('/'),
-            'create' => Pages\CreateTicket::route('/create'),
-            'edit' => Pages\EditTicket::route('/{record}/edit'),
+            'index' => ListTickets::route('/'),
+            'create' => CreateTicket::route('/create'),
+            'edit' => EditTicket::route('/{record}/edit'),
         ];
     }
 }
