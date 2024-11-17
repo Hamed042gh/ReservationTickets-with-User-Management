@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PaymentController;
@@ -14,6 +15,7 @@ Route::get('/', function () {
 
 // general
 Route::get('/tickets', [TicketController::class, 'showTickets'])->name('tickets');
+
 
 // group with autentication
 Route::middleware(['auth'])->group(function () {

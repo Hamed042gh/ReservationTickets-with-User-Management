@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 
+use Carbon\Carbon;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Reservation;
@@ -91,15 +92,16 @@ class ReservationResource extends Resource
                 // Column for 'reservation_date', formatted as a date, sortable and searchable
                 TextColumn::make('reservation_date')
                     ->label('reservation_date')  // Label for the column
-                    ->date('Y-m-d')              // Date format for the reservation date
+                    ->date('Y-m-d/H:i:s')              // Date format for the reservation date
                     ->sortable()                 // Sorting is enabled for this column
-                    ->searchable(),             // Searching is enabled for this column
+                    ->searchable(),
+
 
                 // Column for 'status', sortable and searchable
                 TextColumn::make('status')
                     ->label('status')   // Label for the column
                     ->sortable()        // Sorting is enabled for this column
-                    ->searchable(),     // Searching is enabled for this column
+                    ->searchable()     // Searching is enabled for this column
             ])
             ->filters([  // Filters to narrow down the results displayed in the table
 

@@ -8,6 +8,16 @@
         @livewireStyles
         @vite('resources/css/app.css')
         <link href="{{ asset('css/output.css') }}" rel="stylesheet">
+        @guest
+            <a href="{{ route('login') }}"
+                class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md transition duration-200 hover:bg-blue-700">
+                Log in
+            </a>
+            <a href="{{ route('register') }}"
+                class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md transition duration-200 hover:bg-green-700">
+                Register
+            </a>
+        @endguest
     </head>
 
     <body class="bg-gray-100">
@@ -33,6 +43,7 @@
                 </ul>
             </div>
         @endif
+
         <livewire:search-tickets />
         <livewire:show-tickets />
         <livewire:reservation-tickets />

@@ -26,6 +26,10 @@
 
                 <!-- Main Content (Buttons) -->
                 <div class="mt-6 flex justify-center space-x-6">
+                    <a href="{{ route('tickets') }}"
+                        class="px-6 py-3 bg-orange-500 text-black font-semibold rounded-md transition duration-200 hover:bg-blue-700">
+                        Tickets
+                    </a>
                     <a href="{{ route('login') }}"
                         class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md transition duration-200 hover:bg-blue-700">
                         Log in
@@ -34,6 +38,7 @@
                         class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md transition duration-200 hover:bg-green-700">
                         Register
                     </a>
+
                 </div>
             </div>
         </div>

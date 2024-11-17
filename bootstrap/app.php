@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckAdminRole;
 use Illuminate\Foundation\Application;
 use App\Http\Middleware\CheckReservation;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,8 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'Check.Reservation' => CheckReservation::class
-
+            'Check.Reservation' => CheckReservation::class,
+            'admin' => CheckAdminRole::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
