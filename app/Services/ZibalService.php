@@ -17,7 +17,7 @@ class ZibalService
         $this->apiRequest = env('ZIBAL_API_REQUEST', 'https://gateway.zibal.ir/v1/request');
         $this->apiVerify = env('ZIBAL_API_VERIFY', 'https://gateway.zibal.ir/v1/verify');
         $this->apiInquiry = env('ZIBAL_API_INQUIRY', 'https://gateway.zibal.ir/v1/inquiry');
-        $this->callbackUrl = env('ZIBAL_CALLBACK_URL', 'http://localhost/payment/callback');
+        $this->callbackUrl = env('ZIBAL_CALLBACK_URL', 'http://h00wen41.ir/payment/callback');
         $this->merchant = env('ZIBAL_MERCHANT', 'zibal');
     }
 
